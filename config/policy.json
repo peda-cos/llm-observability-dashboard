@@ -1,0 +1,43 @@
+{
+  "sampling": {
+    "successRate": 0.1,
+    "decisionWaitMs": 2000,
+    "keepErrorTraces": true,
+    "keepPiiTraces": true,
+    "salt": "llm-obs-local"
+  },
+  "eval": {
+    "windowMs": 900000,
+    "sampleRate": 0.25,
+    "batchSize": 100,
+    "intervalMs": 60000,
+    "piiThreshold": 0.7,
+    "faithfulnessThreshold": 0.6,
+    "toxicityThreshold": 0.5,
+    "relevanceThreshold": 0.5,
+    "contextThreshold": 0.5
+  },
+  "drift": {
+    "currentWindowMs": 604800000,
+    "baselineWindowMs": 2419200000,
+    "clusters": 6,
+    "psiThreshold": 0.2,
+    "minCurrent": 20,
+    "minBaseline": 50,
+    "intervalMs": 604800000
+  },
+  "alerts": {
+    "intervalMs": 2000,
+    "windowMs": 300000,
+    "piiMinCount": 2,
+    "piiRateThreshold": 0.005,
+    "latencyWarningMs": 2500,
+    "latencyCriticalMs": 6000,
+    "errorWarningRate": 0.02,
+    "errorCriticalRate": 0.05
+  },
+  "storage": {
+    "maxContentChars": 32000,
+    "maxBodyBytes": 8388608
+  }
+}

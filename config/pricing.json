@@ -1,0 +1,13 @@
+{
+  "currency": "USD",
+  "note": "Sample list prices for local cost math. Verify current provider pricing before production use.",
+  "models": {
+    "gpt-4o-mini": { "input": 0.15, "output": 0.6 },
+    "gpt-4o": { "input": 2.5, "output": 10.0 },
+    "claude-3-5-sonnet-20241022": { "input": 3.0, "output": 15.0 },
+    "claude-3-5-haiku-20241022": { "input": 0.8, "output": 4.0 },
+    "gemini-1.5-flash": { "input": 0.075, "output": 0.3 },
+    "gemini-1.5-pro": { "input": 1.25, "output": 5.0 },
+    "meta-llama/Llama-3.1-8B-Instruct": { "input": 0.2, "output": 0.2 }
+  }
+}
