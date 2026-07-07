@@ -188,3 +188,18 @@ export interface AlertDeliveryRow {
   detail: string | null;
   attemptedUs: number;
 }
+
+export interface IngestCounters {
+  offered: number;
+  kept: number;
+  dropped: number;
+  rejected: number;
+  byReason: Record<string, number>;
+  evals: number;
+  alerts: number;
+}
+
+export function emptyIngestCounters(): IngestCounters {
+  return { offered: 0, kept: 0, dropped: 0, rejected: 0, byReason: {}, evals: 0, alerts: 0 };
+}
+
