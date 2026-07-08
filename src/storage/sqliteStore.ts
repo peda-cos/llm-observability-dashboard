@@ -481,8 +481,16 @@ export class SQLiteStore {
     sampleRate: number,
     limit: number,
   ): SpanRow[] {
+    return this.evalCandidatesBetween(nowUs - windowUs, nowUs, sampleRate, limit);
+  }
+
+  evalCandidatesBetween(
+    fromUs: number,
+    toUs: number,
+    sampleRate: number,
+    limit: number,
+  ): SpanRow[] {
     if (sampleRate <= 0 || limit <= 0) return [];
-    const since = nowUs - windowUs;
     const rows = this.db
       .prepare(
         `SELECT s.* FROM spans s
@@ -496,7 +504,7 @@ export class SQLiteStore {
          ORDER BY s.start_us ASC, s.span_id ASC
          LIMIT ?`,
       )
-      .all(since, nowUs, Math.max(limit * 4, limit)) as RawRow[];
+      .all(fromUs, toUs, Math.max(limit * 4, limit)) as RawRow[];
     return rows
       .map(mapSpan)
       .filter((row) => sampleTrace(row.traceId, this.evalSalt, sampleRate))
@@ -547,7 +555,7 @@ export class SQLiteStore {
 
     const spanRows = this.db
       .prepare(
-        "SELECT app_id, status_code, latency_ms FROM spans WHERE is_eval = 0 AND start_us >= ? AND start_us < ?",
+        "SELECT app_id, status_code, latency_ms FROM spans WHERE is_eval = 0 AND start_us >= ? AND start_us <= ?",
       )
       .all(fiveMinutesAgo, nowUs) as RawRow[];
     for (const row of spanRows) {
@@ -564,7 +572,7 @@ export class SQLiteStore {
 
     const evalRows = this.db
       .prepare(
-        "SELECT app_id, eval_name, eval_score, eval_pass, start_us FROM spans WHERE is_eval = 1 AND start_us >= ? AND start_us < ?",
+        "SELECT app_id, eval_name, eval_score, eval_pass, start_us FROM spans WHERE is_eval = 1 AND start_us >= ? AND start_us <= ?",
       )
       .all(fifteenMinutesAgo, nowUs) as RawRow[];
     for (const row of evalRows) {
@@ -588,9 +596,9 @@ export class SQLiteStore {
 
     const driftRows = this.db
       .prepare(
-        "SELECT app_id, psi, window_end_us FROM drift_runs WHERE window_end_us >= ? ORDER BY window_end_us ASC",
+        "SELECT app_id, psi, window_end_us FROM drift_runs WHERE window_end_us >= ? AND window_end_us <= ? ORDER BY window_end_us ASC",
       )
-      .all(nowUs - 7 * 86_400_000_000) as RawRow[];
+      .all(nowUs - 7 * 86_400_000_000, nowUs) as RawRow[];
     const latestDrift = new Map<string, number>();
     for (const row of driftRows) {
       const appId = String(row.app_id);
