@@ -125,6 +125,7 @@ export interface AppAlertStats {
   evalPassRate: Record<string, number>;
   driftPsi: number | null;
   openAlerts: number;
+  costUsd: number;
 }
 
 export interface DriftRunRow {

@@ -196,6 +196,7 @@ interface StatsAccumulator {
   evals: Map<string, EvalAccumulator>;
   driftPsi: number | null;
   openAlerts: number;
+  costUsd: number;
 }
 
 export interface InsertAlertResult {
@@ -547,6 +548,7 @@ export class SQLiteStore {
           evals: new Map(),
           driftPsi: null,
           openAlerts: 0,
+          costUsd: 0,
         };
         accumulators.set(appId, accumulator);
       }
@@ -555,7 +557,7 @@ export class SQLiteStore {
 
     const spanRows = this.db
       .prepare(
-        "SELECT app_id, status_code, latency_ms FROM spans WHERE is_eval = 0 AND start_us >= ? AND start_us <= ?",
+        "SELECT app_id, status_code, latency_ms, cost_usd FROM spans WHERE is_eval = 0 AND start_us >= ? AND start_us <= ?",
       )
       .all(fiveMinutesAgo, nowUs) as RawRow[];
     for (const row of spanRows) {
@@ -567,6 +569,7 @@ export class SQLiteStore {
         accumulator.spans += 1;
         accumulator.errors += error;
         accumulator.latencies.push(latency);
+        accumulator.costUsd += asNumber(row.cost_usd);
       }
     }
 
@@ -647,6 +650,7 @@ export class SQLiteStore {
           evalPassRate,
           driftPsi: accumulator.driftPsi,
           openAlerts: accumulator.openAlerts,
+          costUsd: accumulator.costUsd,
         };
       })
       .sort((a, b) => (a.appId === "__all__" ? -1 : b.appId === "__all__" ? 1 : a.appId.localeCompare(b.appId)));
@@ -781,6 +785,15 @@ export class SQLiteStore {
     const result = this.db
       .prepare("UPDATE alerts SET status = 'acked', updated_us = ? WHERE id = ? AND status = 'open'")
       .run(nowUs, id);
+    return Number(result.changes) > 0;
+  }
+
+  ackAlertByFingerprint(fingerprint: string, nowUs: number): boolean {
+    const result = this.db
+      .prepare(
+        "UPDATE alerts SET status = 'acked', updated_us = ? WHERE fingerprint = ? AND status = 'open'",
+      )
+      .run(nowUs, fingerprint);
     return Number(result.changes) > 0;
   }
 
