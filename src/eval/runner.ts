@@ -36,7 +36,7 @@ export class EvalRunner {
   }
 
   runOnce(nowUs = this.nowUs()): Promise<EvalRunResult> {
-    return this.runWindow(nowUs - this.deps.policy.windowMs, nowUs, nowUs);
+    return this.runWindow(nowUs - this.deps.policy.windowMs * 1000, nowUs, nowUs);
   }
 
   async runWindow(startUs: number, endUs: number, nowUs: number): Promise<EvalRunResult> {
