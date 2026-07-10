@@ -14,7 +14,7 @@
     "piiThreshold": 0.7,
     "faithfulnessThreshold": 0.6,
     "toxicityThreshold": 0.5,
-    "relevanceThreshold": 0.5,
+    "relevanceThreshold": 0.25,
     "contextThreshold": 0.5
   },
   "drift": {

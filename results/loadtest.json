@@ -1,0 +1,13 @@
+{
+  "target_rate": 1050,
+  "requested_rate": 1100,
+  "measured_rate": 1099.8404638513405,
+  "seconds": 20.002901078,
+  "sent": 22000,
+  "stored": 22000,
+  "kept_ratio": 1,
+  "requests": 220,
+  "p95_post_ms": 8.242670000003272,
+  "max_pending_traces": 100,
+  "rss_mb": 144.420864
+}

@@ -278,6 +278,11 @@ export class SQLiteStore {
     return asNumber(row.n);
   }
 
+  countEvalSpans(): number {
+    const row = this.db.prepare("SELECT COUNT(*) AS n FROM spans WHERE is_eval = 1").get() as RawRow;
+    return asNumber(row.n);
+  }
+
   overview(nowUs: number, windowUs = 86_400_000_000): OverviewStats {
     const since = nowUs - windowUs;
     const aggregate = this.db

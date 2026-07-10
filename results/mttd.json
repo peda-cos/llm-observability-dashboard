@@ -1,0 +1,13 @@
+{
+  "scenario": "injected-ssn-1pct",
+  "mttd_ms": 2244,
+  "spans_after_injection": 220,
+  "baseline_spans": 500,
+  "leak_rate": 0.01,
+  "baseline_pii_alerts": 0,
+  "eval_spans": 2130,
+  "alerts": 2,
+  "slack_messages": 2,
+  "pagerduty_messages": 1,
+  "sink": "slack+pagerduty"
+}

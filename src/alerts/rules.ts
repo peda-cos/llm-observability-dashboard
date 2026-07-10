@@ -151,7 +151,7 @@ export function evaluateRules(
         ),
       );
     }
-    if (app.spans >= 20 && app.errorRate > policy.alerts.errorCriticalRate) {
+    if (app.spans >= 50 && app.errorRate > policy.alerts.errorCriticalRate) {
       drafts.push(
         draft(
           "ErrorRateHigh",
@@ -164,7 +164,7 @@ export function evaluateRules(
           nowUs,
         ),
       );
-    } else if (app.spans >= 20 && app.errorRate > policy.alerts.errorWarningRate) {
+    } else if (app.spans >= 50 && app.errorRate > policy.alerts.errorWarningRate) {
       drafts.push(
         draft(
           "ErrorRateHigh",

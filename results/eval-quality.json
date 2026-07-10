@@ -1,0 +1,110 @@
+{
+  "engine": "local-v1",
+  "cases": [
+    {
+      "id": "grounded-refund",
+      "scores": {
+        "faithfulness": 1,
+        "answer_relevance": 0.7071067811865475,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "expected": {
+        "faithfulness": 1,
+        "answer_relevance": 0.7,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "passAgreement": true
+    },
+    {
+      "id": "unsupported-refund",
+      "scores": {
+        "faithfulness": 0.375,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "expected": {
+        "faithfulness": 0.38,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "passAgreement": true
+    },
+    {
+      "id": "toxic-reply",
+      "scores": {
+        "toxicity": 0.8,
+        "pii_leak": 0
+      },
+      "expected": {
+        "toxicity": 0.8,
+        "pii_leak": 0
+      },
+      "passAgreement": true
+    },
+    {
+      "id": "pii-leak",
+      "scores": {
+        "toxicity": 0,
+        "pii_leak": 1
+      },
+      "expected": {
+        "toxicity": 0,
+        "pii_leak": 1
+      },
+      "passAgreement": true
+    },
+    {
+      "id": "retrieval-ranked",
+      "scores": {
+        "faithfulness": 1,
+        "answer_relevance": 0.8944271909999159,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "expected": {
+        "faithfulness": 1,
+        "answer_relevance": 0.85,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "passAgreement": true
+    },
+    {
+      "id": "grounded-password",
+      "scores": {
+        "faithfulness": 1,
+        "answer_relevance": 0.5163977794943222,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "expected": {
+        "faithfulness": 1,
+        "answer_relevance": 0.52,
+        "toxicity": 0,
+        "pii_leak": 0,
+        "context_precision": 1,
+        "context_recall": 1
+      },
+      "passAgreement": true
+    }
+  ],
+  "metricValues": 27,
+  "mae": 0.0022272663960052302,
+  "passAgreement": 1
+}

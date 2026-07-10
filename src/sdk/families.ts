@@ -1,5 +1,5 @@
 import { newSpanId, newTraceId } from "../ids";
-import type { OtlpAnyValue, OtlpKeyValue, OtlpScopeSpans, OtlpSpan } from "../otlp/types";
+import type { OtlpAnyValue, OtlpKeyValue, OtlpResourceSpans, OtlpScopeSpans, OtlpSpan } from "../otlp/types";
 import type { RetrievalDoc } from "../types";
 
 export const FAMILIES = ["openai", "anthropic", "google", "langchain", "llamaindex", "vllm"] as const;
@@ -117,7 +117,7 @@ function newMessageAttributes(
   ];
 }
 
-export function buildFamilyTrace(family: Family, input: FamilyTraceInput): unknown {
+export function buildFamilyTrace(family: Family, input: FamilyTraceInput): { resourceSpans: OtlpResourceSpans[] } {
   const traceId = input.traceId ?? newTraceId();
   const startUs = input.startUs ?? Date.now() * 1000;
   const latencyUs = (input.latencyMs ?? 180) * 1000;
