@@ -1,0 +1,46 @@
+# Warning routes go to Slack; critical routes fan out to Slack and PagerDuty.
+# Every alert is also mirrored into the dashboard through the v4 webhook.
+# Replace the placeholder endpoints with secrets from your secret manager.
+
+route:
+  receiver: obs-webhook
+  group_by: [alertname, app]
+  group_wait: 5s
+  group_interval: 30s
+  repeat_interval: 1h
+  routes:
+    - matchers: ['severity="critical"']
+      receiver: critical
+      continue: true
+    - matchers: ['severity="warning"']
+      receiver: warning
+      continue: true
+    - matchers: ['alertname=~".+"']
+      receiver: obs-webhook
+
+receivers:
+  - name: obs-webhook
+    webhook_configs:
+      - url: http://ingress:4318/api/alertmanager
+        send_resolved: true
+
+  - name: warning
+    slack_configs:
+      - api_url: http://127.0.0.1:9095/slack-warning
+        channel: "#llm-observability"
+        send_resolved: true
+        title: "{{ .CommonLabels.alertname }} ({{ .CommonLabels.app }})"
+        text: "{{ .CommonAnnotations.description }}"
+
+  - name: critical
+    slack_configs:
+      - api_url: http://127.0.0.1:9095/slack-critical
+        channel: "#llm-observability-critical"
+        send_resolved: true
+        title: "CRITICAL {{ .CommonLabels.alertname }} ({{ .CommonLabels.app }})"
+        text: "{{ .CommonAnnotations.description }}"
+    pagerduty_configs:
+      - routing_key: pagerduty_test_only
+        severity: critical
+        send_resolved: true
+        description: "{{ .CommonAnnotations.summary }}"

@@ -1,0 +1,73 @@
+groups:
+  - name: llm-observability
+    interval: 15s
+    rules:
+      - alert: LlmPiiLeakRateHigh
+        expr: llm_pii_positive_ratio > 0.005
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PII-positive eval rate above 0.5% for {{ $labels.app }}"
+          description: "The PII guard scored {{ $value }} of recent evals positive. Open /evals triage."
+          runbook: "/evals"
+
+      - alert: LlmLatencyP95Warning
+        expr: llm_latency_p95_ms > 2500
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 latency above 2.5s for {{ $labels.app }}"
+          description: "Current p95 is {{ $value }} ms over the five-minute window."
+          runbook: "/"
+
+      - alert: LlmLatencyP95Critical
+        expr: llm_latency_p95_ms > 6000
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "p95 latency above 6s for {{ $labels.app }}"
+          description: "Current p95 is {{ $value }} ms over the five-minute window."
+          runbook: "/"
+
+      - alert: LlmErrorRateWarning
+        expr: llm_error_ratio > 0.02
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Error ratio above 2% for {{ $labels.app }}"
+          description: "Current error ratio is {{ $value }}."
+          runbook: "/traces?status=error"
+
+      - alert: LlmErrorRateCritical
+        expr: llm_error_ratio > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error ratio above 5% for {{ $labels.app }}"
+          description: "Current error ratio is {{ $value }}."
+          runbook: "/traces?status=error"
+
+      - alert: LlmDriftPsiHigh
+        expr: llm_drift_psi > 0.2
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prompt drift PSI above 0.2 for {{ $labels.app }}"
+          description: "Current PSI is {{ $value }} against the trailing four-week baseline."
+          runbook: "/drift"
+
+      - alert: LlmFaithfulnessLow
+        expr: llm_eval_pass_ratio{metric="faithfulness"} < 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Faithfulness pass rate below 80% for {{ $labels.app }}"
+          description: "Current pass ratio is {{ $value }} over the eval window."
+          runbook: "/evals"
