@@ -90,6 +90,15 @@ export interface CostByUserRow {
   failureRate: number;
 }
 
+export interface TopModelRow {
+  model: string;
+  provider: string;
+  spans: number;
+  costUsd: number;
+  p95LatencyMs: number;
+  errorRate: number;
+}
+
 export interface SpanSearchFilter {
   appId?: string;
   userId?: string;

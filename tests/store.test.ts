@@ -56,6 +56,63 @@ test("inserts spans idempotently and excludes eval spans from traffic aggregates
   }
 });
 
+test("top models aggregate provider, cost, p95, and errors while excluding evals", () => {
+  const { db, cleanup } = tempDb();
+  try {
+    const store = new SQLiteStore(db);
+    const now = createClock().nowUs();
+    const spans = Array.from({ length: 20 }, (_, index) =>
+      makeSpan({
+        spanId: newSpanId(),
+        traceId: (index + 40).toString(16).padStart(32, "0"),
+        requestModel: "gpt-4o-mini",
+        genAiSystem: "openai",
+        latencyMs: 100 + index * 10,
+        statusCode: index === 0 ? 2 : 0,
+        costUsd: 0.01,
+        startUs: now - 10_000_000 - index * 1000,
+      }),
+    );
+    store.insertSpans(spans);
+    store.insertSpans([
+      makeSpan({
+        spanId: newSpanId(),
+        traceId: (60).toString(16).padStart(32, "0"),
+        requestModel: "gemini-1.5-flash",
+        genAiSystem: "gcp.gemini",
+        latencyMs: 50,
+        costUsd: 0.001,
+        startUs: now - 1_000_000,
+      }),
+      makeSpan({
+        spanId: newSpanId(),
+        traceId: (61).toString(16).padStart(32, "0"),
+        requestModel: "gpt-4o-mini",
+        genAiSystem: "openai",
+        latencyMs: 9999,
+        costUsd: 99,
+        startUs: now - 30 * 86_400_000_000,
+      }),
+      makeEvalSpan(spans[0], { evalName: "pii_leak", evalScore: 1, evalPass: false }),
+    ]);
+
+    const models = store.topModels(now, 86_400_000_000, 5);
+    assert.deepEqual(
+      models.map((model) => `${model.provider}:${model.model}`),
+      ["openai:gpt-4o-mini", "gcp.gemini:gemini-1.5-flash"],
+    );
+    const openai = models[0];
+    assert.equal(openai.spans, 20);
+    assert.ok(Math.abs(openai.costUsd - 0.2) < 1e-9);
+    assert.equal(openai.errorRate, 1 / 20);
+    assert.ok(openai.p95LatencyMs >= 260);
+    assert.equal(models[1].spans, 1);
+    assert.equal(models[1].errorRate, 0);
+  } finally {
+    cleanup();
+  }
+});
+
 test("search filters and trace lookup return serializable rows", () => {
   const { db, cleanup } = tempDb();
   try {

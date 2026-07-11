@@ -15,6 +15,7 @@ import type {
   SpanRow,
   SpanSearchFilter,
   TimeSeriesPoint,
+  TopModelRow,
   TriageRow,
 } from "../types";
 
@@ -388,6 +389,53 @@ export class SQLiteStore {
         failureRate: spans > 0 ? asNumber(row.errors) / spans : 0,
       };
     });
+  }
+
+  topModels(nowUs: number, windowUs = 86_400_000_000, limit = 5): TopModelRow[] {
+    const rows = this.db
+      .prepare(
+        `SELECT COALESCE(NULLIF(gen_ai_request_model, ''), 'unknown') AS model,
+                COALESCE(NULLIF(gen_ai_system, ''), 'unknown') AS provider,
+                latency_ms,
+                status_code,
+                cost_usd
+         FROM spans
+         WHERE is_eval = 0 AND start_us >= ?`,
+      )
+      .all(nowUs - windowUs) as RawRow[];
+    const models = new Map<
+      string,
+      { model: string; provider: string; spans: number; costUsd: number; latencies: number[]; errors: number }
+    >();
+    for (const row of rows) {
+      const model = String(row.model);
+      const provider = String(row.provider ?? "unknown");
+      const key = `${provider}:${model}`;
+      const entry = models.get(key) ?? {
+        model,
+        provider,
+        spans: 0,
+        costUsd: 0,
+        latencies: [],
+        errors: 0,
+      };
+      entry.spans += 1;
+      entry.costUsd += asNumber(row.cost_usd);
+      entry.latencies.push(asNumber(row.latency_ms));
+      if (asNumber(row.status_code) === 2) entry.errors += 1;
+      models.set(key, entry);
+    }
+    return [...models.values()]
+      .sort((left, right) => right.spans - left.spans)
+      .slice(0, Math.max(1, Math.min(50, limit)))
+      .map((entry) => ({
+        model: entry.model,
+        provider: entry.provider,
+        spans: entry.spans,
+        costUsd: entry.costUsd,
+        p95LatencyMs: percentile95(entry.latencies),
+        errorRate: entry.spans > 0 ? entry.errors / entry.spans : 0,
+      }));
   }
 
   search(filter: SpanSearchFilter = {}): { rows: SpanRow[]; total: number } {
