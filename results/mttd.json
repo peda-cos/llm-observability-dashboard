@@ -1,6 +1,6 @@
 {
   "scenario": "injected-ssn-1pct",
-  "mttd_ms": 2244,
+  "mttd_ms": 2248,
   "spans_after_injection": 220,
   "baseline_spans": 500,
   "leak_rate": 0.01,
