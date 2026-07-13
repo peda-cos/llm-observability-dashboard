@@ -131,8 +131,7 @@ npm run typecheck           # tsc --noEmit
 npm run build               # Next.js production build
 npm run eval-report         # score the hand-labeled fixture and write results/eval-quality.json
 npm run demo                # inject the PII regression and write results/mttd.json
-npm run loadtest -- --rate 1100
-                            # 20-second ingest test, writes results/loadtest.json
+npm run loadtest -- --rate 1100  # 20-second ingest test; writes results/loadtest.json
 npm run drift               # run the weekly drift detector now
 ```
 
@@ -315,6 +314,10 @@ only and deterministic.
 - **ClickHouse/S3 were not run live.** The schemas and exporters are real and
   the HTTP exporter is integration-tested, but throughput was measured on
   SQLite. Do not cite the load number as ClickHouse capacity.
+- **The collector, Prometheus, and Alertmanager configs were not booted as live
+  daemons.** Their YAML parses; the exporter and webhook contracts are covered
+  by tests. Validate them against your pinned collector/Alertmanager versions
+  before production rollout.
 
 ## Project layout
 
